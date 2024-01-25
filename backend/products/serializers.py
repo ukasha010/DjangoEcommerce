@@ -38,9 +38,11 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class AddToCartSerializer(serializers.ModelSerializer):
+    user_username = serializers.CharField(source='user.username', read_only=True)
+    product_product_name = serializers.CharField(source='product.product_name', read_only=True)
     class Meta:
         model = AddToCart
-        fields = '__all__'
+        fields = ['id', 'user_username', 'product_product_name' , 'quantity']
 
 class OrderSerializer(serializers.ModelSerializer):
     user = CustomUserCreateSerializer(read_only=True)

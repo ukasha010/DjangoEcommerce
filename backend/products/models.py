@@ -61,7 +61,7 @@ class Inventory(models.Model):
 
 class AddToCart(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL , on_delete=models.CASCADE)
-    product = models.ForeignKey(Product,on_delete=models.SET_NULL,null=True)
+    product = models.ForeignKey(Product ,on_delete=models.SET_NULL,null=True)
     quantity = models.IntegerField(default=1)
 
     class Meta:

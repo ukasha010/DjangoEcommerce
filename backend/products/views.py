@@ -13,6 +13,7 @@ import json
 from rest_framework.generics import get_object_or_404
 
 
+
 class ProductView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
     # authentication_classes = [authentication.BasicAuthentication]
@@ -104,15 +105,25 @@ class ProductView(APIView):
 
 class AddToCartView(APIView):
     serializer_class = AddToCartSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [authentication.BasicAuthentication]
 
-    def get(self, request, *args, **kwargs):
-        try:
-            instances = AddToCart.objects.filter(user=request.user)
-            serializer = AddToCartSerializer(instances, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except AddToCart.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    def get(self, request , id = None , *args, **kwargs):
+        if (id == None):
+            try:
+                instances = AddToCart.objects.filter(user=request.user)
+                serializer = AddToCartSerializer(instances, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except AddToCart.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            try:
+                instances = AddToCart.objects.filter(id = id , user=request.user)
+                serializer = AddToCartSerializer(instances, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except AddToCart.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+
 
     def post(self, request, format=None):
         serializer = self.serializer_class(data=request.data, context={'request': request, 'user': request.user})
