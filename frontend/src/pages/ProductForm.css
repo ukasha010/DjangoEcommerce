@@ -1,0 +1,89 @@
+/* ProductForm.css */
+
+.product-form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    /* Use min-height instead of height for responsiveness */
+    background-color: #f4f4f4;
+    /* Light background color */
+    overflow-y: auto;
+    padding-top: 7rem;
+    /* Add vertical scrollbar */
+}
+
+form {
+    width: 80%;
+    /* Adjusted width for better visibility on smaller screens */
+    max-width: 500px;
+    /* Set a max-width to prevent the form from becoming too wide */
+    padding: 20px;
+    background-color: #ffffff;
+    /* White background color */
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    /* Box shadow for depth */
+}
+
+h2 {
+    color: #333333;
+    /* Dark text color */
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    color: #555555;
+    /* Text color */
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #cccccc;
+    /* Border color */
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+    color: #333333;
+    /* Text color */
+}
+
+textarea {
+    height: 100px;
+}
+
+.inventory-item {
+    margin-bottom: 15px;
+}
+
+button {
+    background-color: #007bff;
+    /* Primary button color */
+    color: #ffffff;
+    /* Button text color */
+    border: none;
+
+    margin: 4rem 5rem;
+    padding: 4rem 5rem;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+button:hover {
+    background-color: #0056b3;
+    /* Hover color for the button */
+}
+
+/* Media query for smaller screens */
+@media (max-width: 600px) {
+    form {
+        width: 90%;
+        /* Adjusted width for smaller screens */
+    }
+}
