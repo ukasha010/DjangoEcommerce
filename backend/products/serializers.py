@@ -21,7 +21,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = "__all__"
+        fields = "__all__" 
 
     def create(self, validated_data):
         inventory_data = validated_data.pop('inventory')

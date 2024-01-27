@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'products',
+    'Payments',
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
@@ -175,4 +176,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
+
+
+
 
