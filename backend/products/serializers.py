@@ -38,15 +38,15 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class AddToCartSerializer(serializers.ModelSerializer):
-    user_username = serializers.CharField(source='user.username', read_only=True)
-    product_product_name = serializers.CharField(source='product.product_name', read_only=True)
+    user = serializers.CharField(source='user.username', read_only=True)
+    product_name = serializers.CharField(source='product.product_name', read_only=True)
     class Meta:
         model = AddToCart
-        fields = ['id', 'user_username', 'product_product_name' , 'quantity']
+        fields = ['id', 'user', 'product_name' , 'quantity']
 
 class OrderSerializer(serializers.ModelSerializer):
     user = CustomUserCreateSerializer(read_only=True)
-    order_items = AddToCartSerializer(many=True, read_only=True)
+    order_item = AddToCartSerializer(read_only=True)
 
     class Meta:
         model = Order
@@ -54,8 +54,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_total_price(self, obj):
         total_price = 0
-        for item in obj.order_items.all():
-            total_price += item.product.price * item.quantity
+        if obj.order_item:  
+            total_price += obj.order_item.product.price * obj.order_item.quantity
         return total_price
 
 

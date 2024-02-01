@@ -54,26 +54,21 @@ class Inventory(models.Model):
     def __str__(self):
         return f"{self.product.product_name} - {self.size} - {self.color}"
 
-    @receiver(pre_delete, sender=Product)
-    def delete_images(sender, instance, **kwargs):
-        Image.objects.filter(product=instance).delete()
-
-
 class AddToCart(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL , on_delete=models.CASCADE)
-    product = models.ForeignKey(Product ,on_delete=models.SET_NULL,null=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     quantity = models.IntegerField(default=1)
 
     class Meta:
         unique_together = ('user', 'product')
    
     def __str__(self):
-        return str(self.product)
+        return f"{self.user} - {self.product}"
     
 
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL , on_delete=models.CASCADE)
-    order_item  = models.ForeignKey(AddToCart,on_delete=models.SET_NULL,null=True)
+    order_item  = models.ForeignKey(AddToCart, on_delete=models.SET_NULL, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     total_price = models.DecimalField(default=True,max_digits=12, decimal_places=2, null=True, blank=True)
     address = models.CharField(max_length=200, null=True, blank=True)
