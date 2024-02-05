@@ -18,6 +18,7 @@ class ProductView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
     # authentication_classes = [authentication.BasicAuthentication]
     def get(self, request , product_id = None , *args, **kwargs):
+        print("Check Push")
         if product_id == None:
             products = Product.objects.all()
             serializer = ProductSerializer(products, many=True)
