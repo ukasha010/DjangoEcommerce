@@ -52,6 +52,7 @@ const Login = () => {
       } else {
         // Something happened in setting up the request that triggered an Error
         toast.error('An unexpected error occurred. Please try again later.');
+        console.log("cheking push");
       }
     }
   };
