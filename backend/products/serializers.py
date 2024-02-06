@@ -57,25 +57,3 @@ class OrderSerializer(serializers.ModelSerializer):
         if obj.order_item:  
             total_price += obj.order_item.product.price * obj.order_item.quantity
         return total_price
-
-
-# class OrderSerializer(serializers.ModelSerializer):
-#     user = serializers.SerializerMethodField(read_only=True)  
-
-#     def get_order(self, obj):
-#         items = Order.objects.filter(order=obj)
-#         serializer = OrderSerializer(items, many=True)
-#         return serializer.data
-   
-    
-#     def get_user(self, obj):
-#         serializer = UserSerializer(obj.user)
-#         return serializer.data
-    
-#     class Meta:
-#         model = Order
-#         fields = '__all__'
-    
-    
-#     def get_total_price(self, obj):
-#         return obj.product_item.price * obj.number_in_stock
