@@ -44,8 +44,8 @@ class Image(models.Model):
 
 class Inventory(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='inventory')
-    size = models.CharField(max_length=20)
-    color = models.CharField(max_length=20)
+    size = models.CharField(max_length=20 , blank = True , null = True)
+    color = models.CharField(max_length=20 , blank = True , null = True)
     quantity = models.PositiveIntegerField()
 
     class Meta:
