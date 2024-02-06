@@ -1,2 +1,5 @@
+
+# SQLite database files
 *.sqlite
 *.sqlite3
+
