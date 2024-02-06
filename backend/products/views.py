@@ -18,7 +18,7 @@ class ProductView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
     # authentication_classes = [authentication.BasicAuthentication]
     def get(self, request , product_id = None , *args, **kwargs):
-        print("check push")
+        print("Check Push")
         print("Another check")
         if product_id == None:
             products = Product.objects.all()
