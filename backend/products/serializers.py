@@ -6,14 +6,14 @@ import json
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
-        fields = ('img',)
+        fields = ['id' , 'img' ,]
 
 
 class InventorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Inventory
-        fields = ['size', 'color', 'quantity',]
+        fields = ['id' , 'size', 'color', 'quantity',]
 
 class ProductSerializer(serializers.ModelSerializer):
     inventory = InventorySerializer(many=True , read_only = True)

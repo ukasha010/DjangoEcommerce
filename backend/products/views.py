@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated , AllowAny
 from django.contrib.auth.models import User
 import json
 from rest_framework.generics import get_object_or_404
+from django.db import IntegrityError
 
 
 
@@ -18,8 +19,6 @@ class ProductView(APIView):
     # permission_classes = [permissions.IsAuthenticated]
     # authentication_classes = [authentication.BasicAuthentication]
     def get(self, request , product_id = None , *args, **kwargs):
-        print("Check Push")
-        print("Another check")
         if product_id == None:
             products = Product.objects.all()
             serializer = ProductSerializer(products, many=True)
@@ -92,18 +91,18 @@ class ProductView(APIView):
     #         return Response(serializer.data, status=status.HTTP_201_CREATED)
     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # def put(self, request, product_id, *args, **kwargs):
-    #     product = Product.objects.get(id=product_id)
-    #     serializer = ProductSerializer(product, data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(status=status.HTTP_200_OK)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request, product_id, *args, **kwargs):
+        product = Product.objects.get(id=product_id)
+        serializer = ProductSerializer(product, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # def delete(self, request, product_id, *args, **kwargs):
-    #     product = Product.objects.get(id=product_id)
-    #     product.delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request, product_id, *args, **kwargs):
+        product = Product.objects.get(id=product_id)
+        product.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class AddToCartView(APIView):
     serializer_class = AddToCartSerializer
@@ -127,12 +126,49 @@ class AddToCartView(APIView):
                 return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-    def post(self, request, format=None):
-        serializer = self.serializer_class(data=request.data, context={'request': request, 'user': request.user})
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request , format=None):
+        try:
+            product_id = request.data.get('product_id')
+            size = request.data.get('size')
+            color = request.data.get('color')
+            product = Product.objects.get(id = product_id)
+            inventory = Inventory.objects.get(product = product , size = size , color = color)
+            # Check if the user already has this product in the cart
+            existing_cart_item = AddToCart.objects.get(user=request.user, product=product)
+            
+            # If it exists, you might want to update the quantity or do something else
+            quantity = request.data.get('quantity', 1)
+            quantity = int(quantity)
+
+            # Check if the requested quantity exceeds the available quantity
+            if existing_cart_item.quantity + quantity > inventory.quantity:
+                return Response({'error': 'Requested quantity exceeds available quantity.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            existing_cart_item.quantity += quantity
+            existing_cart_item.save()
+
+            serializer = self.serializer_class(existing_cart_item, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except AddToCart.DoesNotExist:
+            serializer = self.serializer_class(data=request.data, context={'request': request, 'user': request.user})
+            
+            if serializer.is_valid():
+                # Check if the requested quantity exceeds the available quantity
+                requested_quantity = int(request.data.get('quantity', 1))
+                if requested_quantity > inventory.quantity:
+                    return Response({'error': 'Requested quantity exceeds available quantity.'}, status=status.HTTP_400_BAD_REQUEST)
+
+                serializer.save(user=request.user, product=product)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        except IntegrityError:
+            return Response({'error': 'Product is already in the cart.'}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, id, *args, **kwargs):
         instance = get_object_or_404(AddToCart, id=id)
@@ -149,13 +185,22 @@ class AddToCartView(APIView):
 
 class OrderView(APIView):
 
-    def get(self, request, *args, **kwargs):
-        try:
-            instance = Order.objects.filter(user=request.user)
-            serializer = OrderSerializer(instance , many = True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    def get(self, request, id = None , *args, **kwargs): #Make it for both id and not for id
+        if id == None: 
+            try:
+                instance = Order.objects.filter(user=request.user)
+                serializer = OrderSerializer(instance , many = True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            try:
+                instance = Order.objects.filter(id = id , user=request.user)
+                serializer = OrderSerializer(instance)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+
 
     def post(self, request , id , *args, **kwargs):
         serializer = OrderSerializer(data=request.data, context={'request': request, 'user': request.user})
