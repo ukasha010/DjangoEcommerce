@@ -134,7 +134,7 @@ class AddToCartView(APIView):
             product = Product.objects.get(id = product_id)
             inventory = Inventory.objects.get(product = product , size = size , color = color)
             # Check if the user already has this product in the cart
-            existing_cart_item = AddToCart.objects.get(user=request.user, product=product)
+            existing_cart_item = AddToCart.objects.get(user=request.user, product=product , inventory = inventory)
             
             # If it exists, you might want to update the quantity or do something else
             quantity = request.data.get('quantity', 1)
@@ -159,7 +159,7 @@ class AddToCartView(APIView):
                 if requested_quantity > inventory.quantity:
                     return Response({'error': 'Requested quantity exceeds available quantity.'}, status=status.HTTP_400_BAD_REQUEST)
 
-                serializer.save(user=request.user, product=product)
+                serializer.save(user=request.user, product=product , inventory = inventory)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

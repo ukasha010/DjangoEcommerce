@@ -5,6 +5,10 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.conf import settings
+from .validators import QuantityValidator
+from django.core.exceptions import ValidationError
+
+
 
 
 class Product(models.Model):
@@ -42,6 +46,8 @@ class Image(models.Model):
         
 
 
+#Pendings
+#Save attributes according to the product type if possible.
 class Inventory(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='inventory')
     size = models.CharField(max_length=20 , blank = True , null = True)
@@ -54,17 +60,32 @@ class Inventory(models.Model):
     def __str__(self):
         return f"{self.product.product_name} - {self.size} - {self.color}"
 
+
+
 class AddToCart(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL , on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.SET_NULL , null = True)
-    quantity = models.IntegerField(default=1)
+    inventory = models.ForeignKey(Inventory , on_delete = models.SET_NULL , null = True)
+    quantity = models.IntegerField(default = 1)
 
     class Meta:
-        unique_together = ('user', 'product')
+        unique_together = ('user', 'product' , 'inventory')
    
     def __str__(self):
         return f"{self.user} - {self.product}"
+     
+    # def clean(self):
+    #     super().clean()
+    #     validator = QuantityValidator(0)
+    #     validator(self.quantity, self)
     
+    def clean(self):
+        super().clean()
+        if self.inventory:
+            inventory_quantity = self.inventory.quantity
+            max_validator = MaxValueValidator(inventory_quantity , message=f'Ensure that the quantity is less then or equals to {inventory_quantity}')
+            max_validator(self.quantity)
+
 
 class Order(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL , on_delete=models.CASCADE)
@@ -81,3 +102,18 @@ class Order(models.Model):
 
     def __str__(self):
         return str(self.user)
+    
+    def clean(self):
+        super().clean()
+        if self.order_item:
+            order_item_price = self.order_item.product.price
+
+            errors = {}
+            if order_item_price != self.price:
+                errors['price'] = ['Price must be same as products price']
+            
+            if self.total_price < order_item_price:
+                errors['total_price'] = ['Total Price must be greater then or equals to the products price']
+
+            if errors:
+                raise ValidationError(errors)

@@ -170,7 +170,6 @@ DJOSER = {
     'SERIALIZERS': {
         'user_create': 'accounts.serializers.CustomUserCreateSerializer',
     },
-
 }
 
 
